@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 """
 Sample program to demonstrate how marine lights could be simmulated. 
-It is written with no object orientation to make it easier for someone with not a lot of
-programming experience to port this to an Arduino. For this reason the clock is polled 
-instead of using alarms and signals.
+It is written with no object orientation, threading or async code to make it easier to port to an Arduino.
+Polling is used as an Arduino does not have signals.
 """
 
 import json
@@ -40,6 +39,42 @@ lights = [
         "sequence": [1.0, 1.2, 1.0, 6.8],
         "seq_num": -1,
     },
+    # Pier 1
+    {
+        "name": "Pier 1 Port",
+        "colour": "red",
+        "sequence": [
+            0.04, 0.06,
+            0.04, 0.06,
+            0.04, 0.06,
+            0.04, 0.06,
+            0.04, 0.06,
+            0.04, 0.06,
+            0.04, 0.3,
+        ],
+        "seq_num": -1,
+    },
+    {
+        "name": "Pier 1 Starboard",
+        "colour": "green",
+        "sequence": [
+            0.04, 0.06,
+            0.04, 0.06,
+            0.04, 0.06,
+            0.04, 0.06,
+            0.04, 0.06,
+            0.04, 0.06,
+            0.04, 0.3,
+        ],
+        "seq_num": -1,
+    },
+    # Cardinals
+    {
+        "name": "Northern Cardinal 1",
+        "colour": "white",
+        "sequence": [0.3, 0.5],
+        "seq_num": -1,
+    },
 ]
 colour = {
     "red": Fore.RED,
@@ -48,7 +83,7 @@ colour = {
     "black": Fore.BLACK
 }
 event_stack = []
-max_event_stack = 5
+max_event_stack = 10
 debug = False
 
 def mkEvent(light_id, event_time):
@@ -94,7 +129,7 @@ def initialiseLights():
     for i, light in enumerate(lights):
         start_time = now + sum(light["sequence"]) * random()
         insertIntoEventStack(i, start_time)
-    doDebug(json.dumps(event_stack, indent=2))
+    doDebug(f"Event Stack:\n{json.dumps(event_stack, indent=2)}")
     doDebug(f"Time is {now}")
 
 def updateLight(id, state):
@@ -102,11 +137,12 @@ def updateLight(id, state):
     pass
 
 def printLights():
-    print(f"\r{Back.BLACK}            ", end="")
+    BLOCK_GRAPHIC="\u2588"  # Unicode for block graphic
+    print(f"\r{Back.BLACK}            ", end="")  # Print on the same line by using \r to return the cursor to line beginning
     for light in lights:
         state = getLightState(light["seq_num"])
         use_colour = colour[light["colour"]] if state == 1 else colour["black"]
-        print(f"{use_colour}\u2588{Fore.BLACK}              ", end="", flush=True)
+        print(f"{use_colour}{BLOCK_GRAPHIC}{Fore.BLACK}              ", end="", flush=True)
 
 def doDebug(msg):
     if debug:
@@ -115,14 +151,20 @@ def doDebug(msg):
 def main():
     parser = ArgumentParser()
     parser.add_argument("-d", dest="debug", help="Show debug output", action="store_true")
+    parser.add_argument("-s", dest="show", help="Show lights description", action="store_true")
     args = parser.parse_args()
     global debug 
     debug = args.debug
+    if args.show:
+        for light in lights:
+            print(f"Name: {light['name']}\nColour: {light['colour']}\nSequence: {light['sequence']}\n")
+        return
 
     initColorama()
+
+    print("Press <Ctrl-C> to exit:\n")
     initialiseLights()
     next_event_time = peekEventStack()["time"]
-    print()
     while True:
         if time() >= next_event_time:
             event = popEventStack()
@@ -138,7 +180,7 @@ def main():
             next_event_time = peekEventStack()["time"]
             printLights()
 
-        sleep(0.01)  # Loop every 10ms to simulate polling on an arduino's due to lack of signals/alarms
+        sleep(0.005)  # Loop every 5ms to simulate polling on an arduino due to an Arduino's lack of signals/alarms
 
          
          
