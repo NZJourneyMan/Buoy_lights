@@ -1,8 +1,8 @@
-# Bouy Lights Code for Arduino
+# Buoy Lights Code for Arduino
 
 ## Introdution
 
-This repo contains Arduino code to enable a builder to make a physical model of a harbour complete with IALA flashing lights on harbour structures like bouys, bridges, piers, etc. There is Arduino code for both Uno and AdaFruit Trinket boards.
+This repo contains Arduino code to enable a builder to make a physical model of a harbour complete with IALA flashing lights on harbour structures like buoys, bridges, piers, etc. There is Arduino code for both Uno and AdaFruit Trinket boards.
 
 The repo also contains a python demo program that was used to develop the logic that was used to create the Arduino code. Full disclosure, Claude AI did the conversion from the python code to the Uno and Trinket code.
 
@@ -20,7 +20,7 @@ mkdir mydir
 cd mydir
 
 # Get reposigory
-git clone https://github.com/NZJourneyMan/Bouy_lights.git
+git clone https://github.com/NZJourneyMan/buoy_lights.git
 ```
 
 ## Run on Python
